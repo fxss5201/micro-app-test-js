@@ -15,11 +15,11 @@
             <el-button size="mini" @click="setMainAtionToken">设置actionToken为mainAtionToken</el-button>
           </div>
           <div class="head-content">
-            <span>主应用Props(bus)通信:</span>
+            <span>主应用Action + Vuex通信:</span>
             <el-divider direction="vertical"></el-divider>
-            <span>busToken: {{ busToken }}</span>
+            <span>actionVuexToken: {{ actionVuexToken }}</span>
             <el-divider direction="vertical"></el-divider>
-            <el-button size="mini" @click="setMainBusToken">设置busToken为mainBusToken</el-button>
+            <el-button size="mini" @click="setMainActionVuexToken">设置actionVuexToken为mainActionVuexToken</el-button>
           </div>
         </el-header>
         <el-main>
@@ -38,7 +38,6 @@
 <script>
 import MainMenu from '@/components/MainMenu.vue'
 import actions from '@/shared/actions'
-import busOn from './plugins/busOn'
 
 export default {
   name: 'app',
@@ -77,7 +76,7 @@ export default {
     }
   },
   computed: {
-    busToken () {
+    actionVuexToken () {
       return this.$store.state.tokenModule.token
     }
   },
@@ -86,28 +85,21 @@ export default {
       // state: 变更后的状态; prevState: 变更前的状态
       console.log('主应用观察者：token 改变前的值为 ', prevState.token)
       console.log('主应用观察者：改变后的 token 的值为 ', state.token)
+
       this.actionToken = state.token
+      this.$store.commit('tokenModule/setToken', state.token)
     }, true)
-
-    // bus.$on('setBusToken', (val: string) => {
-    //   this.$store.commit('tokenModule/setToken', val)
-    // })
-
-    // 多个eventBus统一书写地方
-    busOn.install(this)
   },
   methods: {
     setMainAtionToken () {
       actions.setGlobalState({ token: 'mainAtionToken' })
     },
-    setMainBusToken () {
-      // 防止多次commit setToken，所以将commit setToken放在eventBus中去做，此处仅emit eventBus
-      // this.$store.commit('tokenModule/setToken', 'mainBusToken')
-      this.$bus.$emit('setBusToken', 'mainBusToken')
+    setMainActionVuexToken () {
+      actions.setGlobalState({ token: 'mainActionVuexToken' })
     }
   },
   watch: {
-    busToken: {
+    actionVuexToken: {
       immediate: true,
       handler (val, oldVal) {
         // vuex中token值: val变更后的状态; oldVal: 变更前的状态
